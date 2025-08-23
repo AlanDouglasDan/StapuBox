@@ -14,20 +14,16 @@ import Feather from "@expo/vector-icons/Feather";
 
 import { fetchTournamentDemo, fetchSportsList } from "./src/http";
 import { AccordionList } from "./src/components/AccordionList";
-import { TournamentDemoResponse, Sport } from "./src/http/types";
+import { Sport } from "./src/http/types";
 
 export default function App() {
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedSport, setSelectedSport] = useState<string | null>(null);
 
   const [sportsList, setSportsList] = useState<Sport[]>([]);
-  const [tournamentDemo, setTournamentDemo] = useState<TournamentDemoResponse>(
-    {} as TournamentDemoResponse
-  );
+  const [tournamentDemo, setTournamentDemo] = useState<any>({});
 
   const [loading, setLoading] = useState<boolean>(true);
-
-  const [value, setValue] = useState(null);
-  const [isFocus, setIsFocus] = useState(false);
 
   const getData = async () => {
     try {
@@ -37,7 +33,7 @@ export default function App() {
       setSportsList(sportsList.data);
 
       const tournamentDemo = await fetchTournamentDemo();
-      setTournamentDemo(tournamentDemo);
+      setTournamentDemo(tournamentDemo.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -45,19 +41,80 @@ export default function App() {
     }
   };
 
+  const getTournamentsOnSelectedDate = (allSportsTournaments: any) => {
+    // Filter out tournaments for each sport where the start date matches the selected date
+    const tournamentsOnSelectedDate = allSportsTournaments.flatMap(
+      (sport: any) => {
+        // If a selected sport is provided, filter by that sport_id
+        if (selectedSport && sport.sport_id !== selectedSport) {
+          return []; // Skip this sport if it doesn't match the selectedSport
+        }
+
+        return sport.tournaments
+          .filter((tournament: any) => {
+            // Compare only the date part (yyyy-mm-dd) of the start_date
+            const tournamentStartDate = tournament.start_date.split("T")[0];
+            return tournamentStartDate === selectedDate;
+          })
+          .map((tournament: any) => ({
+            ...tournament,
+            sport_name: sport.sport_name, // Add sport name for reference
+            sport_id: sport.sport_id,
+          }));
+      }
+    );
+
+    return tournamentsOnSelectedDate;
+  };
+
+  // console.log(
+  //   selectedDate &&
+  //     tournamentDemo &&
+  //     getTournamentsOnSelectedDate(selectedDate, tournamentDemo)
+  // );
+
   useEffect(() => {
     getData();
   }, []);
 
   const markedDates = useMemo(() => {
-    return {
-      [selectedDate]: {
+    const dates: any = {};
+
+    const sportEvent = selectedSport
+      ? tournamentDemo.filter(
+          (sport: { sport_id: number }) =>
+            sport.sport_id === Number(selectedSport)
+        )[0]
+      : null;
+
+    if (sportEvent)
+      sportEvent.tournaments.forEach((event: { start_date: string }) => {
+        dates[event.start_date.split("T")[0]] = {
+          selected: true,
+          selectedTextColor: "#E17827",
+          selectedColor: "#FFF",
+        };
+      });
+    else if (tournamentDemo?.length > 0)
+      tournamentDemo.map((event: any) =>
+        event.tournaments.forEach((event: any) => {
+          dates[event.start_date.split("T")[0]] = {
+            selected: true,
+            selectedTextColor: "#E17827",
+            selectedColor: "#FFF",
+          };
+        })
+      );
+
+    if (selectedDate)
+      dates[selectedDate] = {
         selected: true,
         selectedColor: "#E17827",
         selectedTextColor: "#fff",
-      },
-    };
-  }, [selectedDate]);
+      };
+
+    return dates;
+  }, [selectedDate, selectedSport, tournamentDemo]);
 
   if (loading) {
     return (
@@ -67,10 +124,13 @@ export default function App() {
     );
   }
 
-  const sportsData = sportsList.map((sport) => ({
-    label: sport.sport_name,
-    value: sport.sport_id,
-  }));
+  const sportsData = [
+    { label: "All", value: null },
+    ...sportsList.map((sport) => ({
+      label: sport.sport_name,
+      value: sport.sport_id,
+    })),
+  ];
 
   return (
     <View style={styles.container}>
@@ -82,7 +142,7 @@ export default function App() {
           contentContainerStyle={styles.contentContainer}
         >
           <Dropdown
-            style={[styles.dropdown, isFocus && { borderColor: "#000" }]}
+            style={styles.dropdown}
             placeholderStyle={styles.placeholderStyle}
             selectedTextStyle={styles.selectedTextStyle}
             inputSearchStyle={styles.inputSearchStyle}
@@ -93,14 +153,11 @@ export default function App() {
             maxHeight={300}
             labelField="label"
             valueField="value"
-            placeholder={!isFocus ? "Search your sport" : "..."}
+            placeholder={"Search your sport"}
             searchPlaceholder="Search..."
-            value={value}
-            onFocus={() => setIsFocus(true)}
-            onBlur={() => setIsFocus(false)}
+            value={selectedSport}
             onChange={(item) => {
-              setValue(item.value);
-              setIsFocus(false);
+              setSelectedSport(item.value);
             }}
           />
 
@@ -128,7 +185,13 @@ export default function App() {
             )}
           />
 
-          <AccordionList />
+          {selectedDate &&
+            tournamentDemo &&
+            getTournamentsOnSelectedDate(tournamentDemo)?.map(
+              (tournament: any, index: number) => (
+                <AccordionList key={index} tournament={tournament} />
+              )
+            )}
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -151,7 +214,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    paddingBottom: 20,
+    paddingBottom: 30,
   },
   flexRow: {
     flexDirection: "row",
@@ -164,9 +227,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
   },
   text14: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: "##333333",
+    fontSize: 15,
+    color: "#333333",
   },
 
   // dropdown
@@ -195,5 +257,6 @@ const styles = StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
+    color: "#000",
   },
 });

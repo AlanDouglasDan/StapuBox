@@ -35,7 +35,7 @@ export interface TournamentDemoResponse {
   msg: string;
   err: null | string;
   data: {
-    sports_id: number;
+    sport_id: number;
     sport_name: string;
     tournaments: Tournament[];
   }[];
