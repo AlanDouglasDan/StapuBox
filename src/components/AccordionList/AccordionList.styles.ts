@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
   flexRow: {
@@ -70,6 +70,7 @@ export default StyleSheet.create({
     fontSize: 10,
     fontWeight: "500",
     color: "#E17827",
+    textTransform: "capitalize",
   },
   header12: {
     fontSize: 12,
@@ -86,5 +87,10 @@ export default StyleSheet.create({
   expandIcon: {
     alignItems: "center",
     marginVertical: 10,
-  }
+  },
+  accordionContainer: {
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0, 0, 0, 0.06)",
+    paddingVertical: 6,
+  },
 });
