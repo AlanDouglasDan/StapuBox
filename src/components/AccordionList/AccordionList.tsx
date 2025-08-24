@@ -22,15 +22,15 @@ interface AccordionListProps {
 }
 
 const SkeletonLoader: FC<{ style: any }> = ({ style }) => (
-  <View style={[style, { backgroundColor: '#f0f0f0', borderRadius: 4 }]} />
+  <View style={[style, { backgroundColor: "#f0f0f0", borderRadius: 4 }]} />
 );
 
 const ImageWithSkeleton: FC<{
   source: any;
   placeholder: any;
   style: any;
-  contentFit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
-}> = ({ source, placeholder, style, contentFit = 'cover' }) => {
+  contentFit?: "cover" | "contain" | "fill" | "scale-down" | "none";
+}> = ({ source, placeholder, style, contentFit = "cover" }) => {
   const [isLoading, setIsLoading] = useState(true);
   const opacity = useState(new Animated.Value(0))[0];
   const [imageSource, setImageSource] = useState(source);
@@ -55,12 +55,21 @@ const ImageWithSkeleton: FC<{
   }, [source]);
 
   return (
-    <View style={[style, { position: 'relative' }]}>
-      {isLoading && <SkeletonLoader style={[StyleSheet.absoluteFillObject, { zIndex: 1 }]} />}
-      <Animated.View style={[{ opacity, width: '100%', height: '100%' }, isLoading && { position: 'absolute', zIndex: 0 }]}>
+    <View style={[style, { position: "relative" }]}>
+      {isLoading && (
+        <SkeletonLoader
+          style={[StyleSheet.absoluteFillObject, { zIndex: 1 }]}
+        />
+      )}
+      <Animated.View
+        style={[
+          { opacity, width: "100%", height: "100%" },
+          isLoading && { position: "absolute", zIndex: 0 },
+        ]}
+      >
         <Image
           source={imageSource}
-          style={[{ width: '100%', height: '100%' }]}
+          style={[{ width: "100%", height: "100%" }]}
           placeholder={placeholder}
           contentFit={contentFit}
           onLoad={onLoad}
@@ -90,8 +99,6 @@ const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpanded(!expanded);
   };
-
-  console.log(tournament.matches);
 
   return (
     <View>
@@ -167,18 +174,21 @@ const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
         tournament.matches.map((match: any, index: number) => (
           <View style={styles.padded} key={index}>
             <View style={styles.matchContainer}>
-              <View style={[styles.flexRow, styles.justifyBetween]}>
-                <View style={[styles.flexRow, styles.gap]}>
+              <View style={styles.matchHeader}>
+                <View style={styles.matchTeams}>
                   <ImageWithSkeleton
                     source={{ uri: tournament.tournament_img_url }}
                     style={styles.ballIcon}
                     placeholder={images.tournamentIcon}
                     contentFit="cover"
                   />
-
-                  <Text style={styles.text12}>
-                    {match.team_a} vs {match.team_b}
-                  </Text>
+                  <View style={styles.teamNames}>
+                    <Text style={styles.text12}>
+                      <Text style={{ fontWeight: "500" }}>{match.team_a}</Text>
+                      <Text> vs </Text>
+                      <Text style={{ fontWeight: "500" }}>{match.team_b}</Text>
+                    </Text>
+                  </View>
                 </View>
 
                 <View style={styles.orangeContainer}>
@@ -191,19 +201,17 @@ const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
               <Text style={styles.text10}>Team Men</Text>
 
               <View style={[styles.flexRow, styles.justifyEvenly]}>
-                <ImageWithSkeleton
+                <Image
                   source={images.team1}
                   style={styles.teamImage}
-                  placeholder={images.tournamentIcon}
                   contentFit="cover"
                 />
 
                 <Text style={styles.header12}>VS</Text>
 
-                <ImageWithSkeleton
+                <Image
                   source={images.team2}
                   style={styles.teamImage}
-                  placeholder={images.tournamentIcon}
                   contentFit="cover"
                 />
               </View>

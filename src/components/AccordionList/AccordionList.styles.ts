@@ -26,6 +26,26 @@ export default StyleSheet.create({
     paddingHorizontal: 8,
     borderRadius: 10,
   },
+  matchHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 8,
+  },
+  matchTeams: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 6,
+  },
+  teamNames: {
+    flex: 1,
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   ballIcon: {
     width: 20,
     height: 20,
@@ -36,6 +56,8 @@ export default StyleSheet.create({
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 2,
+    flexShrink: 0,
+    justifyContent: 'center',
   },
   teamImage: {
     width: 60,
@@ -92,5 +114,8 @@ export default StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0, 0, 0, 0.06)",
     paddingVertical: 6,
+  },
+  flex: {
+    flex: 1,
   },
 });

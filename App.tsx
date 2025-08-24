@@ -134,7 +134,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
 
       <SafeAreaView style={styles.container}>
         <ScrollView
