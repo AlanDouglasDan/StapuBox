@@ -21,7 +21,7 @@ export default function App() {
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
 
   const [sportsList, setSportsList] = useState<Sport[]>([]);
-  const [tournamentDemo, setTournamentDemo] = useState<any>({});
+  const [tournamentList, setTournamentList] = useState<any>({});
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -32,8 +32,8 @@ export default function App() {
       const sportsList = await fetchSportsList();
       setSportsList(sportsList.data);
 
-      const tournamentDemo = await fetchTournamentDemo();
-      setTournamentDemo(tournamentDemo.data);
+      const _tournamentDemo = await fetchTournamentDemo();
+      setTournamentList(_tournamentDemo.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -69,34 +69,34 @@ export default function App() {
 
   // console.log(
   //   selectedDate &&
-  //     tournamentDemo &&
-  //     getTournamentsOnSelectedDate(selectedDate, tournamentDemo)
+  //     tournamentList &&
+  //     getTournamentsOnSelectedDate(tournamentList)
   // );
 
   useEffect(() => {
     getData();
   }, []);
 
+  const sportEvent = selectedSport
+    ? tournamentList.filter(
+        (sport: { sport_id: number }) =>
+          sport.sport_id === Number(selectedSport)
+      )[0]
+    : undefined;
+
   const markedDates = useMemo(() => {
     const dates: any = {};
 
-    const sportEvent = selectedSport
-      ? tournamentDemo.filter(
-          (sport: { sport_id: number }) =>
-            sport.sport_id === Number(selectedSport)
-        )[0]
-      : null;
-
-    if (sportEvent)
-      sportEvent.tournaments.forEach((event: { start_date: string }) => {
+    if (selectedSport)
+      sportEvent?.tournaments.forEach((event: { start_date: string }) => {
         dates[event.start_date.split("T")[0]] = {
           selected: true,
           selectedTextColor: "#E17827",
           selectedColor: "#FFF",
         };
       });
-    else if (tournamentDemo?.length > 0)
-      tournamentDemo.map((event: any) =>
+    else if (tournamentList?.length > 0)
+      tournamentList.map((event: any) =>
         event.tournaments.forEach((event: any) => {
           dates[event.start_date.split("T")[0]] = {
             selected: true,
@@ -114,7 +114,7 @@ export default function App() {
       };
 
     return dates;
-  }, [selectedDate, selectedSport, tournamentDemo]);
+  }, [selectedDate, selectedSport, tournamentList]);
 
   if (loading) {
     return (
@@ -134,7 +134,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
 
       <SafeAreaView style={styles.container}>
         <ScrollView
@@ -186,8 +186,8 @@ export default function App() {
           />
 
           {selectedDate &&
-            tournamentDemo &&
-            getTournamentsOnSelectedDate(tournamentDemo)?.map(
+            tournamentList &&
+            getTournamentsOnSelectedDate(tournamentList)?.map(
               (tournament: any, index: number) => (
                 <AccordionList key={index} tournament={tournament} />
               )
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    paddingBottom: 30,
+    paddingBottom: Platform.OS === "ios" ? 30 : 70,
   },
   flexRow: {
     flexDirection: "row",
