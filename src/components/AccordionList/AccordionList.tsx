@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,10 @@ import {
   Platform,
   UIManager,
   TouchableOpacity,
-  Image,
+  Animated,
+  StyleSheet,
 } from "react-native";
+import { Image } from "expo-image";
 import Entypo from "@expo/vector-icons/Entypo";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
@@ -18,6 +20,62 @@ import styles from "./AccordionList.styles";
 interface AccordionListProps {
   tournament: any;
 }
+
+const SkeletonLoader: FC<{ style: any }> = ({ style }) => (
+  <View style={[style, { backgroundColor: '#f0f0f0', borderRadius: 4 }]} />
+);
+
+const ImageWithSkeleton: FC<{
+  source: any;
+  placeholder: any;
+  style: any;
+  contentFit?: 'cover' | 'contain' | 'fill' | 'scale-down' | 'none';
+}> = ({ source, placeholder, style, contentFit = 'cover' }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const opacity = useState(new Animated.Value(0))[0];
+  const [imageSource, setImageSource] = useState(source);
+
+  const onLoad = useCallback(() => {
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setIsLoading(false));
+  }, [opacity]);
+
+  // Handle case where source might be undefined
+  useEffect(() => {
+    if (source?.uri) {
+      setImageSource(source);
+    } else if (source) {
+      // For local images
+      setIsLoading(false);
+      onLoad();
+    }
+  }, [source]);
+
+  return (
+    <View style={[style, { position: 'relative' }]}>
+      {isLoading && <SkeletonLoader style={[StyleSheet.absoluteFillObject, { zIndex: 1 }]} />}
+      <Animated.View style={[{ opacity, width: '100%', height: '100%' }, isLoading && { position: 'absolute', zIndex: 0 }]}>
+        <Image
+          source={imageSource}
+          style={[{ width: '100%', height: '100%' }]}
+          placeholder={placeholder}
+          contentFit={contentFit}
+          onLoad={onLoad}
+          onError={() => {
+            // Fallback to placeholder if image fails to load
+            if (placeholder) {
+              setImageSource(placeholder);
+            }
+          }}
+          transition={300}
+        />
+      </Animated.View>
+    </View>
+  );
+};
 
 const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
   const [expanded, setExpanded] = useState<boolean>(false);
@@ -33,7 +91,7 @@ const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
     setExpanded(!expanded);
   };
 
-  console.log(tournament);
+  console.log(tournament.matches);
 
   return (
     <View>
@@ -50,10 +108,11 @@ const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
           ]}
         >
           <View style={[styles.flexRow, styles.gap]}>
-            <Image
-              source={images.tournamentIcon}
+            <ImageWithSkeleton
+              source={{ uri: tournament.tournament_img_url }}
               style={styles.tournamentIcon}
-              resizeMode="cover"
+              placeholder={images.tournamentIcon}
+              contentFit="cover"
             />
 
             <View>
@@ -92,13 +151,15 @@ const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
           </View>
         </View>
 
-        <View style={styles.expandIcon}>
-          {expanded ? (
-            <Entypo name="chevron-thin-up" size={20} color={"#E17827"} />
-          ) : (
-            <Entypo name="chevron-thin-down" size={20} color={"#E17827"} />
-          )}
-        </View>
+        {tournament.matches.length > 0 && (
+          <View style={styles.expandIcon}>
+            {expanded ? (
+              <Entypo name="chevron-thin-up" size={20} color={"#E17827"} />
+            ) : (
+              <Entypo name="chevron-thin-down" size={20} color={"#E17827"} />
+            )}
+          </View>
+        )}
       </TouchableOpacity>
 
       {expanded &&
@@ -108,10 +169,11 @@ const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
             <View style={styles.matchContainer}>
               <View style={[styles.flexRow, styles.justifyBetween]}>
                 <View style={[styles.flexRow, styles.gap]}>
-                  <Image
-                    source={images.soccerBall}
+                  <ImageWithSkeleton
+                    source={{ uri: tournament.tournament_img_url }}
                     style={styles.ballIcon}
-                    resizeMode="cover"
+                    placeholder={images.tournamentIcon}
+                    contentFit="cover"
                   />
 
                   <Text style={styles.text12}>
@@ -129,18 +191,20 @@ const AccordionList: FC<AccordionListProps> = ({ tournament }) => {
               <Text style={styles.text10}>Team Men</Text>
 
               <View style={[styles.flexRow, styles.justifyEvenly]}>
-                <Image
+                <ImageWithSkeleton
                   source={images.team1}
                   style={styles.teamImage}
-                  resizeMode="cover"
+                  placeholder={images.tournamentIcon}
+                  contentFit="cover"
                 />
 
                 <Text style={styles.header12}>VS</Text>
 
-                <Image
+                <ImageWithSkeleton
                   source={images.team2}
                   style={styles.teamImage}
-                  resizeMode="cover"
+                  placeholder={images.tournamentIcon}
+                  contentFit="cover"
                 />
               </View>
 
