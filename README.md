@@ -13,7 +13,7 @@ A modern React Native application for browsing sports tournaments and matches wi
 
 ## Demo
 
-Check out the app demo here: [Watch Demo](https://drive.google.com/file/d/1e8FJTITjc9BUrCYpeyEbSukkp26kKZJv/view?usp=sharing)
+Check out the app demo here: [Watch Demo](https://drive.google.com/file/d/1cI6RaM0_0lUet70heYIOgOwB_ZSvvUlt/view?usp=sharing)
 
 ## Tech Stack
 
